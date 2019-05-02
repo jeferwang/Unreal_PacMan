@@ -36,14 +36,14 @@ public:
     void SetInVulnerable();
 
     // 设置敌人是否可移动
-    void SetMove(bool MoveIt);
+    void SetMove(bool bMoveIt);
 
     // 敌人被杀死（迅速移动到出生点）
     void Killed();
 
     // 重新装填（重新设置为正常的敌人状态）
     void ReArm();
-
+ UFUNCTION()
     void OnCollision(
         class UPrimitiveComponent *HitComp,
         class AActor *OtherActor,

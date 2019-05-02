@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "AIController.h"
 #include "Enemy.h"
+#include "PacManGameModeBase.h"
 #include "AiEnemy.generated.h"
 
 /**
@@ -30,6 +31,7 @@ public:
     void StopMove();
 
 private:
+  APacManGameModeBase *GameMode;
     // 敌人实例
     class AEnemy *Bot;
     // 初始位置

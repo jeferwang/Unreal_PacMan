@@ -3,6 +3,7 @@
 #include "Public/AiEnemy.h"
 #include "NavigationSystem.h"
 #include "Public/TimerManager.h"
+#include "Kismet/GameplayStatics.h"
 
 void AAiEnemy::OnPossess(class APawn *InPawn)
 {
@@ -11,13 +12,12 @@ void AAiEnemy::OnPossess(class APawn *InPawn)
     Bot = Cast<AEnemy>(InPawn);
     // 获取敌人初始位置
     HomeLocation = Bot->GetActorLocation();
-    // 开始的时候就自动寻路
-    SearchNewPoint();
+    GameMode=Cast<APacManGameModeBase>(UGameplayStatics::GetGameMode(this));
 }
 
 void AAiEnemy::OnMoveCompleted(FAIRequestID RequestID, const FPathFollowingResult &Result)
 {
-    if (!Bot->bIsDead)
+    if (!Bot->bIsDead && GameMode->GetCurrentState()!=EGameState::EPause)
     {
         SearchNewPoint();
     }
@@ -25,18 +25,21 @@ void AAiEnemy::OnMoveCompleted(FAIRequestID RequestID, const FPathFollowingResul
 
 void AAiEnemy::SearchNewPoint()
 {
+
     // 获得导航系统
-    UNavigationSystem *NavMesh = FNavigationSystem::GetCurrent<UNavigationSystem>(this);
+    UNavigationSystemV1 *NavMesh = FNavigationSystem::GetCurrent<UNavigationSystemV1>(GetWorld());
     if (NavMesh)
     {
-        const float SearchRadius = 1000.0f;
-        FVector RandomPoint;
+        float SearchRadius = 10000.0f;
+        FNavLocation RandomPoint;
+        const FVector currLoc=Bot->GetActorLocation();
 
-        bool bFound = NavMesh->K2_GetRandomReachablePointInRadius(this, Bot->GetActorLocation(), RandomPoint, SearchRadius);
+        bool bFound = NavMesh->GetRandomReachablePointInRadius( currLoc,SearchRadius,RandomPoint);
 
         if (bFound)
         {
             MoveToLocation(RandomPoint);
+        }else{
         }
     }
 }
@@ -55,5 +58,5 @@ void AAiEnemy::ReArm()
 
 void AAiEnemy::StopMove()
 {
-    StopMovement();
+    MoveToLocation(Bot->GetActorLocation());
 }

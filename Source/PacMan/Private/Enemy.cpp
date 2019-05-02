@@ -5,6 +5,7 @@
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Public/PacManCharacter.h"
+#include "AiEnemy.h"
 
 // Sets default values
 AEnemy::AEnemy()
@@ -31,6 +32,10 @@ AEnemy::AEnemy()
         VulnerableMaterial = (UMaterialInterface *)MVulnerable.Object;
     }
     UE_LOG(LogTemp, Warning, TEXT("%s"), *VulnerableMaterial->GetFullName())
+
+    AIControllerClass = AAiEnemy::StaticClass();
+    // 启用碰撞检测
+    SetActorEnableCollision(true);
 }
 
 // Called when the game starts or when spawned
@@ -39,6 +44,9 @@ void AEnemy::BeginPlay()
     Super::BeginPlay();
     // 获取默认的材质
     DefaultMaterial = EnemyBody->GetMaterial(0);
+    // 绑定碰撞函数
+    GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &AEnemy::OnCollision);
+GetCharacterMovement()->MaxWalkSpeed = 150.0f;
 }
 
 // Called every frame
@@ -75,8 +83,17 @@ void AEnemy::SetInVulnerable()
     GetCharacterMovement()->MaxWalkSpeed = 150.0f;
 }
 
-void AEnemy::SetMove(bool MoveIt)
+void AEnemy::SetMove(bool bMoveIt)
 {
+    AAiEnemy *AI = Cast<AAiEnemy>(GetController());
+    if (bMoveIt)
+    {
+        AI->SearchNewPoint();
+    }
+    else
+    {
+        AI->StopMove();
+    }
 }
 
 void AEnemy::Killed()
@@ -87,6 +104,8 @@ void AEnemy::Killed()
     }
     bIsDead = true;
     GetCharacterMovement()->MaxWalkSpeed = 300.0f;
+    AAiEnemy *AI = Cast<AAiEnemy>(GetController());
+    AI->GoHome();
 }
 
 void AEnemy::ReArm()
@@ -95,8 +114,9 @@ void AEnemy::ReArm()
     GetCharacterMovement()->MaxWalkSpeed = 150.0f;
     if (bIsVulnerable)
     {
-        bIsVulnerable = false;
+       SetInVulnerable();
     }
+    SetMove(true);
 }
 
 void AEnemy::OnCollision(
@@ -107,14 +127,18 @@ void AEnemy::OnCollision(
     bool bFromSweep,
     const FHitResult &SweetResult)
 {
+            UE_LOG(LogTemp, Warning, TEXT("发生碰撞"));
+
     if (OtherActor->IsA(APacManCharacter::StaticClass()))
     {
         if (bIsVulnerable)
         {
+            UE_LOG(LogTemp, Warning, TEXT("发生碰撞，吃掉敌人"));
             Killed();
         }
         else
         {
+            UE_LOG(LogTemp, Warning, TEXT("发生碰撞，主角被吃掉"));
             // 找到主角
             APacManCharacter *PacMan = Cast<APacManCharacter>(OtherActor);
             PacMan->Killed();

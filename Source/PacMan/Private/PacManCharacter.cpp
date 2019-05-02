@@ -57,15 +57,19 @@ void APacManCharacter::SetupPlayerInputComponent(UInputComponent *PlayerInputCom
 // X Axis的移动控制
 void APacManCharacter::MoveXAxis(float AxisValue)
 {
+    if(GameMode->GetCurrentState()==EGameState::EPlaying){
     CurrentVelocity.X = AxisValue;
     AddMovementInput(CurrentVelocity);
+    }
 }
 
 // Y Axis的移动控制
 void APacManCharacter::MoveYAxis(float AxisValue)
 {
+    if(GameMode->GetCurrentState()==EGameState::EPlaying){
     CurrentVelocity.Y = AxisValue;
     AddMovementInput(CurrentVelocity);
+    }
 }
 
 // 暂停
