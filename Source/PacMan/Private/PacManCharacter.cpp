@@ -131,7 +131,7 @@ void APacManCharacter::OnCollision(
 void APacManCharacter::Killed()
 {
     // 没有生命值，GameOver
-    if (--Lives == 0)
+    if (--Lives < 0)
     {
         GameMode->SetCurrentState(EGameState::EGameOver);
     }

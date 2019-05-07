@@ -21,6 +21,11 @@ protected:
     virtual void BeginPlay() override;
 
 public:
+    int CollectablesToEat;
+
+    int Lives;
+
+
     // Called every frame
     virtual void Tick(float DeltaTime) override;
 
@@ -45,6 +50,8 @@ public:
     // 主角死亡
     void Killed();
 
+
+
     UFUNCTION()
 
     void OnCollision(
@@ -61,9 +68,6 @@ private:
 
     APacManGameModeBase *GameMode;
 
-    int CollectablesToEat;
-
-    int Lives;
 
     FVector StartPoint;
 };
